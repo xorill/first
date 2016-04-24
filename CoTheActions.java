@@ -1,5 +1,10 @@
 package proba;
 
+
+import java.awt.Point;
+
+
+
 public class CoTheActions {
 
 	
@@ -36,4 +41,9 @@ public class CoTheActions {
 				
 	}
 	
+	public void mouseEvent(Point p) {
+
+		}
 }
+	
+
