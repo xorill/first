@@ -13,18 +13,18 @@ import javax.imageio.ImageIO;
 
 public class JumbleImage extends Component {
 
-	private static final long serialVersionUID = 1L;
-	private int numlocs = 3;
-    private int numcells = numlocs*numlocs;
+    private static final long serialVersionUID = 1L;
+    private int numlocs = 0;
+    private int numcells = 0;
     private int[] cells;
     private int[] completed;
     private Image bi;
     private Image blank;
-    int w, h, cw, ch, moves = 0;
+    int w, h, cw, ch, moves = 0, offset = 0;
     Instant start;
     Instant end;
     
-    public JumbleImage(String cim, int maxsize) {
+    public JumbleImage(String cim, int maxsize, int pieces) {
         try {
             bi = ImageIO.read(new File(cim));
         } catch (IOException e) {
@@ -37,6 +37,9 @@ public class JumbleImage extends Component {
         else {
         	bi = bi.getScaledInstance(-1, maxsize, Image.SCALE_SMOOTH);
         }
+        offset = 0;
+        numlocs = pieces;
+        numcells = numlocs*numlocs;
         w = bi.getWidth(null);
         h = bi.getHeight(null);
         cw = w/numlocs;
@@ -123,7 +126,7 @@ public class JumbleImage extends Component {
     	String result = "";
     	time = new int[3];
     	end = Instant.now();
-    	long s = Duration.between(start, end).getSeconds();
+    	long s = Duration.between(start, end).getSeconds() + offset;
     	time[0] = (int) (s/3600);
     	if(time[0] != 0) result += time[0] + ":";
     	s %= 3600;
@@ -134,6 +137,36 @@ public class JumbleImage extends Component {
     	if(time[2] < 10) result += "0" + time[2];
     	else result += time[2];
     	return result;
+    }
+
+    public String state(){
+    	String status = "";
+    	status += numlocs + ",";
+    	status += moves + ",";
+    	status += elapsedTime() + ",";
+    	for(int i=0; i<numlocs; i++) {
+    		for(int j=0; j<numlocs; j++) {
+    				status += cells[i*numlocs+j] + ",";
+    		}
+    	}
+    	return status;
+    }
+    
+    public void loadState(String data){
+    	moves = Integer.parseInt(data.substring(0, data.indexOf(',')));
+	    data = data.substring(data.indexOf(',')+1);
+	    int k = data.indexOf(',');
+	    offset = Integer.parseInt(data.substring(k-2, k));
+	    offset += Integer.parseInt(data.substring(k-5>=0 ? k-5 : k-4, k-3))*60;
+	    if(k-6>0) offset += Integer.parseInt(data.substring(k-7, k-6))*3600;
+	    data = data.substring(data.indexOf(',')+1);
+    	for(int i=0; i<numlocs; i++) {
+    		for(int j=0; j<numlocs; j++) {
+    			cells[i*numlocs+j] = Integer.parseInt(data.substring(0,data.indexOf(',')));
+    			System.out.print(cells[i*numlocs+j]);
+    			if(data != "") data = data.substring(data.indexOf(',')+1);
+    		}
+    	}
     }
 
     public Dimension getPreferredSize() {
