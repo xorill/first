@@ -5,6 +5,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -25,6 +32,7 @@ public class GuiOfTheGame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private CoTheActions InstCoTheActions;
 	JumbleImage split = null;
+	String imagename = "Ford-gt-1366x768.jpg";
 
 	GuiOfTheGame(CoTheActions Co) {
 		
@@ -51,7 +59,7 @@ public class GuiOfTheGame extends JFrame {
 		statusInf.setBorder(BorderFactory.createTitledBorder("Status of the game"));
 		add(statusInf);
 		
-		JLabel timeFromGameStart = new JLabel("Time from start of the game:");
+		JLabel timeFromGameStart = new JLabel("Time:");
 		statusInf.add(timeFromGameStart);
 	    
 	    	JLabel numberOfMoves = new JLabel("Moves:");
@@ -70,10 +78,9 @@ public class GuiOfTheGame extends JFrame {
 			public void actionPerformed(ActionEvent evObject) {
 				//InstCoTheActions.startSingleGame();
 				//amíg nincs megcsinálva a dialógus, addig így működik:
-				String imagename = "Ford-gt-1366x768.jpg";
 				origPicField.removeAll();
-				origPicField.add(new JumbleImage(imagename, 180));
-				JumbleImage temp = new JumbleImage(imagename, 375);	// a Panel címe miatt nem fér ki a 400
+				origPicField.add(new JumbleImage(imagename, 180, 3));
+				JumbleImage temp = new JumbleImage(imagename, 375, 3);	// a Panel címe miatt nem fér ki a 400
 				split = temp;
 				split.jumble();
 				exerciseField.removeAll();
@@ -81,7 +88,7 @@ public class GuiOfTheGame extends JFrame {
 				revalidate();
 				repaint();
 				numberOfMoves.setText("Moves: 0");
-				timeFromGameStart.setText("Time from start of the game: 0:00");
+				timeFromGameStart.setText("Time: 0:00");
 				numberOfGood.setText("Pieces in the right place: " + split.check());
 			}
 		});
@@ -121,7 +128,34 @@ public class GuiOfTheGame extends JFrame {
 		Load.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				InstCoTheActions.startLoad();
+				//InstCoTheActions.startLoad();
+				String content = null;
+				File file = new File("Saved_game.txt");
+			    FileReader reader = null;
+			    try {
+			        reader = new FileReader(file);
+			        char[] chars = new char[(int) file.length()];
+			        reader.read(chars);
+			        content = new String(chars);
+			        reader.close();
+			    } catch (IOException e) {
+			        e.printStackTrace();
+			    }
+			    imagename = content.substring(0,content.indexOf(','));
+			    content = content.substring(content.indexOf(',')+1);
+			    origPicField.removeAll();
+				origPicField.add(new JumbleImage(imagename, 180, Integer.parseInt(content.substring(0,content.indexOf(',')))));
+				JumbleImage temp = new JumbleImage(imagename, 375, Integer.parseInt(content.substring(0,content.indexOf(','))));
+				split = temp;
+				content = content.substring(content.indexOf(',')+1);
+				split.loadState(content);
+				exerciseField.removeAll();
+				exerciseField.add(split);
+				revalidate();
+				repaint();
+				timeFromGameStart.setText("Time: " + split.elapsedTime());
+				numberOfMoves.setText("Moves: " + split.getmoves());
+				numberOfGood.setText("Pieces in the right place: " + split.check());
 			}
 		});
 		Options.add(Load);
@@ -130,7 +164,16 @@ public class GuiOfTheGame extends JFrame {
 		Save.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				InstCoTheActions.saveGame();
+				//InstCoTheActions.saveGame();
+				PrintWriter writer = null;
+				try {
+					writer = new PrintWriter("Saved_game.txt", "UTF-8");
+				} catch (FileNotFoundException | UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				writer.printf(/*"Játékosnév," + */imagename + "," + split.state());
+				writer.close();
 			}
 		});
 		Options.add(Save);
@@ -161,7 +204,7 @@ public class GuiOfTheGame extends JFrame {
 		timer.scheduleAtFixedRate(new TimerTask() {
 			  public void run() {
 				  if(split != null){
-					  timeFromGameStart.setText("Time from start of the game: " + split.elapsed_time());
+					  timeFromGameStart.setText("Time: " + split.elapsed_time());
 				  }
 			  }
 			}, (long) 1000, (long) 1000);
