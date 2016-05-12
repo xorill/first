@@ -62,7 +62,7 @@ public class GuiOfTheGame extends JFrame {
 		JLabel timeFromGameStart = new JLabel("Time:");
 		statusInf.add(timeFromGameStart);
 	    
-	    	JLabel numberOfMoves = new JLabel("Moves:");
+	    JLabel numberOfMoves = new JLabel("Moves:");
 		statusInf.add(numberOfMoves);
 		
 		JLabel numberOfGood = new JLabel("Pieces in the right place: ");
@@ -204,7 +204,7 @@ public class GuiOfTheGame extends JFrame {
 		timer.scheduleAtFixedRate(new TimerTask() {
 			  public void run() {
 				  if(split != null){
-					  timeFromGameStart.setText("Time: " + split.elapsed_time());
+					  timeFromGameStart.setText("Time: " + split.elapsedTime());
 				  }
 			  }
 			}, (long) 1000, (long) 1000);
