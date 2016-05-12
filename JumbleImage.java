@@ -13,8 +13,8 @@ import javax.imageio.ImageIO;
 
 public class JumbleImage extends Component {
 
-    private static final long serialVersionUID = 1L;
-    private int numlocs = 0;
+	private static final long serialVersionUID = 1L;
+	private int numlocs = 0;
     private int numcells = 0;
     private int[] cells;
     private int[] completed;
@@ -121,7 +121,7 @@ public class JumbleImage extends Component {
     	return good;
     }
     
-    public String elapsed_time(){
+    public String elapsedTime(){
     	int[] time;
     	String result = "";
     	time = new int[3];
@@ -138,7 +138,7 @@ public class JumbleImage extends Component {
     	else result += time[2];
     	return result;
     }
-
+    
     public String state(){
     	String status = "";
     	status += numlocs + ",";
@@ -168,7 +168,7 @@ public class JumbleImage extends Component {
     		}
     	}
     }
-
+    
     public Dimension getPreferredSize() {
         return new Dimension(w, h);
     }
