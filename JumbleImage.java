@@ -230,15 +230,15 @@ public class JumbleImage extends Component {
 	}
 	
     public void receive(String[] s){
-    	if(s.length == 1){
+    	if(s.length == 1){ //ha egyelemu, akkor a kep neve van benne
     		imgadr=s[0];
     	}
-    	else if(s.length == 2){
+    	else if(s.length == 2){ //ha ketelemu, akkor az ellenfel allasa
     		oppMoves=Integer.parseInt(s[0]);
     		oppRight=Integer.parseInt(s[1]);
     	}
     	else{
-    		for(int i=0;i<s.length;i++){
+    		for(int i=0;i<s.length;i++){ //ha tobb, akkor a keveres
     			cells[i]=Integer.parseInt(s[i]);
     		}
     	}

@@ -11,7 +11,7 @@ import java.io.File;
 
 public class CoTheActions {
 	
-	CoTheActions() {   														//konstruktor
+	CoTheActions() {   	//konstruktor
 	}
 	
 	String[] startMultiGame() {
@@ -55,7 +55,7 @@ public class CoTheActions {
 	    s[1]=(String)ip.getText();
 	    s[2]=(String)port.getText();
 	    
-	    return s; //ha szerver, akkor ures stringet adunk vissza; ha kliens, akkor a szerver IP-jet
+	    return s;
 	}
 
 	int startExit() {

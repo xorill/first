@@ -284,7 +284,7 @@ public class GuiOfTheGame extends JFrame {
 					  }
 				  }
 			  }
-			}, (long) 1000, (long) 1000);
+			}, (long) 1000, (long) 100); //ez szandekosan 100ms! igy azonnal frissul az ellenfel allasa
 	    
 		setVisible(true);
 	}	
