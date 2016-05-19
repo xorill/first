@@ -233,15 +233,28 @@ public class JumbleImage extends Component {
     	if(s.length == 1){
     		imgadr=s[0];
     	}
-    	else{
+    	else if(s.length == 2){
     		oppMoves=Integer.parseInt(s[0]);
     		oppRight=Integer.parseInt(s[1]);
+    	}
+    	else{
+    		for(int i=0;i<s.length;i++){
+    			cells[i]=Integer.parseInt(s[i]);
+    		}
     	}
     }
     
     public void sendImageName(String name){
     	String[] s=new String[1];
     	s[0]=name;
+    	net.send(s);
+    }
+    
+    public void sendState(){
+    	String[] s=new String[numcells];
+    	for(int i=0;i<numcells;i++){
+    		s[i]=""+cells[i];
+    	}
     	net.send(s);
     }
     
