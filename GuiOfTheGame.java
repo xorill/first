@@ -1,4 +1,4 @@
-package proba;
+package puzzle;
 
 
 import java.awt.event.ActionEvent;
@@ -18,13 +18,16 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import java.util.Timer;
 import java.util.TimerTask;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 
 public class GuiOfTheGame extends JFrame {
@@ -32,30 +35,33 @@ public class GuiOfTheGame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private CoTheActions InstCoTheActions;
 	JumbleImage split = null;
-	String imagename = "Ford-gt-1366x768.jpg";
+	String imagename = "";
+	String playerName = "";
+	String loadedGame = "";
+	int tableSize;
 
 	GuiOfTheGame(CoTheActions Co) {
 		
-		super("proba");
+		super("Tili toli");
 		InstCoTheActions = Co;
-		setSize(720, 720);
+		setSize(920, 720);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(null);
 		Timer timer = new Timer();
 		
 		JPanel exerciseField = new JPanel(new BorderLayout());
-		exerciseField.setBounds(30, 30, 400, 400);
+		exerciseField.setBounds(30, 30, 600, 600);
 		exerciseField.setBorder(BorderFactory.createTitledBorder("Exercise"));
 		add(exerciseField);
 		
 		JPanel origPicField = new JPanel(new BorderLayout());
-		origPicField.setBounds(470,430 , 200, 200);
+		origPicField.setBounds(670,430 , 200, 200);
 		origPicField.setBorder(BorderFactory.createTitledBorder("Original Picture"));
 		add(origPicField);
 		
 		JPanel statusInf = new JPanel();
 		statusInf.setLayout(new BoxLayout(statusInf, BoxLayout.PAGE_AXIS));
-		statusInf.setBounds(470,30 , 200, 400);
+		statusInf.setBounds(670,30 , 200, 400);
 		statusInf.setBorder(BorderFactory.createTitledBorder("Status of the game"));
 		add(statusInf);
 		
@@ -68,6 +74,14 @@ public class GuiOfTheGame extends JFrame {
 		JLabel numberOfGood = new JLabel("Pieces in the right place: ");
 		statusInf.add(numberOfGood);
 		
+		JLabel modeOfGame = new JLabel("Mode: ");
+		statusInf.add(modeOfGame);
+		
+		JLabel othersMoves = new JLabel("");
+		statusInf.add(othersMoves);
+		
+		JLabel othersGood = new JLabel("");
+		statusInf.add(othersGood);		
 		
 		JMenuBar mbarOfTheGame= new JMenuBar();
 		JMenu NGame = new JMenu("New game");
@@ -76,11 +90,13 @@ public class GuiOfTheGame extends JFrame {
 		SingleUser.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				//InstCoTheActions.startSingleGame();
-				//amíg nincs megcsinálva a dialógus, addig így működik:
+				playerName = InstCoTheActions.getPlayername();
+				imagename = InstCoTheActions.getImagename();
+				tableSize = InstCoTheActions.getTableParam();
+				
 				origPicField.removeAll();
-				origPicField.add(new JumbleImage(imagename, 180, 3));
-				JumbleImage temp = new JumbleImage(imagename, 375, 3);	// a Panel címe miatt nem fér ki a 400
+				origPicField.add(new JumbleImage(imagename, 180, tableSize));
+				JumbleImage temp = new JumbleImage(imagename, 575, tableSize);	// a Panel címe miatt nem fér ki a 400
 				split = temp;
 				split.jumble();
 				exerciseField.removeAll();
@@ -90,6 +106,11 @@ public class GuiOfTheGame extends JFrame {
 				numberOfMoves.setText("Moves: 0");
 				timeFromGameStart.setText("Time: 0:00");
 				numberOfGood.setText("Pieces in the right place: " + split.check());
+				modeOfGame.setText("Mode: single player");
+				othersMoves.setText("");
+				othersGood.setText("");
+				
+				split.multi=false;
 			}
 		});
 		NGame.add(SingleUser);
@@ -98,7 +119,38 @@ public class GuiOfTheGame extends JFrame {
 		MultUser.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				InstCoTheActions.startMultiGame();
+				imagename=InstCoTheActions.getImagename();
+				tableSize = InstCoTheActions.getTableParam();
+				
+				origPicField.removeAll();
+				origPicField.add(new JumbleImage(imagename, 180, tableSize));
+				JumbleImage temp = new JumbleImage(imagename, 375, tableSize);	// a Panel címe miatt nem fér ki a 400
+				split = temp;
+				split.jumble();
+				exerciseField.removeAll();
+				exerciseField.add(split);
+				revalidate();
+				repaint();
+				numberOfMoves.setText("Moves: 0");
+				timeFromGameStart.setText("Time: 0:00");
+				numberOfGood.setText("Pieces in the right place: " + split.check());
+				modeOfGame.setText("Mode: multiplayer");
+				othersMoves.setText("Opponent's moves:");
+				othersGood.setText("Opponent's right pieces:");
+				
+				split.multi=true;
+		
+				String[] s=InstCoTheActions.startMultiGame();
+				if(s[0].equals("Server")){
+					split.client=false;
+					split.startServer(Integer.parseInt(s[2]));
+					modeOfGame.setText("Mode: multiplayer (server)");
+				}
+				else{
+					split.client=true;
+					split.startClient(s[1],Integer.parseInt(s[2]));
+					modeOfGame.setText("Mode: multiplayer (client)");
+				}
 			}
 		});
 		NGame.add(MultUser);
@@ -120,6 +172,7 @@ public class GuiOfTheGame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
 				InstCoTheActions.startDisconnect();
+				if((split!=null)&&(split.multi))split.disconnect();
 			}
 		});
 		Options.add(Disconn);
@@ -128,12 +181,12 @@ public class GuiOfTheGame extends JFrame {
 		Load.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				//InstCoTheActions.startLoad();
+				loadedGame = InstCoTheActions.startLoad();
 				String content = null;
-				File file = new File("Saved_game.txt");
+				File file = new File(loadedGame);
 			    FileReader reader = null;
 			    try {
-			        reader = new FileReader(file);
+			        reader = new FileReader(loadedGame);
 			        char[] chars = new char[(int) file.length()];
 			        reader.read(chars);
 			        content = new String(chars);
@@ -141,6 +194,8 @@ public class GuiOfTheGame extends JFrame {
 			    } catch (IOException e) {
 			        e.printStackTrace();
 			    }
+			    playerName = content.substring(0,content.indexOf(','));
+			    content = content.substring(content.indexOf(',')+1);
 			    imagename = content.substring(0,content.indexOf(','));
 			    content = content.substring(content.indexOf(',')+1);
 			    origPicField.removeAll();
@@ -156,6 +211,11 @@ public class GuiOfTheGame extends JFrame {
 				timeFromGameStart.setText("Time: " + split.elapsedTime());
 				numberOfMoves.setText("Moves: " + split.getmoves());
 				numberOfGood.setText("Pieces in the right place: " + split.check());
+				modeOfGame.setText("Mode: single player");
+				othersMoves.setText("");
+				othersGood.setText("");
+				
+				split.multi=false;
 			}
 		});
 		Options.add(Load);
@@ -164,15 +224,22 @@ public class GuiOfTheGame extends JFrame {
 		Save.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				//InstCoTheActions.saveGame();
+				if(split==null)
+					return;
+				if(split.multi){
+					JOptionPane.showMessageDialog(null,"Cannot save game in multiplayer mode!","Sorry",JOptionPane.ERROR_MESSAGE);
+					return;
+				}
 				PrintWriter writer = null;
 				try {
-					writer = new PrintWriter("Saved_game.txt", "UTF-8");
+					DateFormat date_F = new SimpleDateFormat("yyyyMMddHHmmss");
+					Calendar c = Calendar.getInstance();
+					writer = new PrintWriter(playerName + "_" + date_F.format(c.getTime()) + ".txt", "UTF-8");
 				} catch (FileNotFoundException | UnsupportedEncodingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				writer.printf(/*"Játékosnév," + */imagename + "," + split.state());
+				writer.printf(playerName + "," + imagename + "," + split.state());
 				writer.close();
 			}
 		});
@@ -182,7 +249,12 @@ public class GuiOfTheGame extends JFrame {
 		Exit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				System.exit(0);
+				int sel = InstCoTheActions.startExit();
+				if(sel == 0){
+					Save.doClick(1);
+					System.exit(0);
+				}
+				else if(sel == 1) System.exit(0);
 			}
 		});
 		Options.add(Exit);
@@ -198,6 +270,7 @@ public class GuiOfTheGame extends JFrame {
 				exerciseField.repaint();
 				numberOfMoves.setText("Moves: " + split.getmoves());
 				numberOfGood.setText("Pieces in the right place: " + split.check());
+				if(split.multi) split.send();
 			}
 		});
 		
@@ -205,6 +278,10 @@ public class GuiOfTheGame extends JFrame {
 			  public void run() {
 				  if(split != null){
 					  timeFromGameStart.setText("Time: " + split.elapsedTime());
+					  if(split.multi){
+						  othersMoves.setText("Opponent's moves: "+split.getOppMoves());
+						  othersGood.setText("Opponent's right pieces: "+split.getOppRight());
+					  }
 				  }
 			  }
 			}, (long) 1000, (long) 1000);
