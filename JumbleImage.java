@@ -1,4 +1,4 @@
-package proba;
+package puzzle;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -20,15 +20,23 @@ public class JumbleImage extends Component {
     private int[] completed;
     private Image bi;
     private Image blank;
-    int w, h, cw, ch, moves = 0, offset = 0;
+    int w, h, cw, ch, moves = 0, offset = 0, stop = 0;
     Instant start;
     Instant end;
+    boolean multi, client;
+    private Network net = null;
+    private int oppMoves=0, oppRight=0;
+    String imgadr = "";
     
     public JumbleImage(String cim, int maxsize, int pieces) {
-        try {
+        if(imgadr != ""){
+        	cim = imgadr;
+        }
+    	try {
             bi = ImageIO.read(new File(cim));
         } catch (IOException e) {
             System.out.println("Image could not be read");
+            System.out.println(cim);
             // System.exit(1);
         }
         if(bi.getWidth(null) >= bi.getHeight(null)){
@@ -76,6 +84,7 @@ public class JumbleImage extends Component {
             cells[i] = cells[ri];
             cells[ri] = tmp;
         }
+        stop = 0;
     }
     // x,y a képrészlet koordinátái, amire kattintottunk
     // tx,ty a "szürke" képrészlet koordinátái
@@ -118,6 +127,7 @@ public class JumbleImage extends Component {
     			}
     		}
     	}
+    	if(good == numcells) stop = 1;
     	return good;
     }
     
@@ -125,7 +135,9 @@ public class JumbleImage extends Component {
     	int[] time;
     	String result = "";
     	time = new int[3];
-    	end = Instant.now();
+    	if(stop == 0){
+    		end = Instant.now();
+    	}
     	long s = Duration.between(start, end).getSeconds() + offset;
     	time[0] = (int) (s/3600);
     	if(time[0] != 0) result += time[0] + ":";
@@ -198,5 +210,53 @@ public class JumbleImage extends Component {
                 }
             }
         }
+    }
+    void startServer(int port) {
+		if (net != null)
+			net.disconnect();
+		net = new NetworkServer(this);
+		net.connect("localhost",port);
+	}
+
+	void startClient(String ip, int port) {
+		if (net != null)
+			net.disconnect();
+		net = new NetworkClient(this);
+		net.connect(ip,port);
+	}
+    
+	void disconnect(){
+		net.disconnect();
+	}
+	
+    public void receive(String[] s){
+    	if(s.length == 1){
+    		imgadr=s[0];
+    	}
+    	else{
+    		oppMoves=Integer.parseInt(s[0]);
+    		oppRight=Integer.parseInt(s[1]);
+    	}
+    }
+    
+    public void sendImageName(String name){
+    	String[] s=new String[1];
+    	s[0]=name;
+    	net.send(s);
+    }
+    
+    public void send(){
+    	String[] s=new String[2];
+    	s[0]=""+getmoves();
+    	s[1]=""+check();
+    	net.send(s);
+    }
+    
+    public String getOppMoves(){
+    	return ""+oppMoves;
+    }
+    
+    public String getOppRight(){
+    	return ""+oppRight;
     }
 }
