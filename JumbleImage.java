@@ -23,7 +23,8 @@ public class JumbleImage extends Component {
     int w, h, cw, ch, moves = 0, offset = 0;
     Instant start;
     Instant end;
-    boolean multi, client, conn, started=false, stop=false;
+    boolean multi, client, started=false, stop=false;
+    volatile  boolean conn=false;
     private Network net = null;
     private int oppMoves=0, oppRight=0;
     String imgadr = "";

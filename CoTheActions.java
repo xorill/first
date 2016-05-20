@@ -41,7 +41,7 @@ public class CoTheActions {
 	    ip.setEnabled(false);
 	    JTextField port = new JTextField("10007");
 	    controls.add(port);
-	    String[] imgopts={"Pug","Porsche","Woods"};
+	    String[] imgopts={"Numbers","Pug","Porsche","Woods"};
 	    JComboBox<String> imgsel = new JComboBox<String>(imgopts);
 	    controls.add(imgsel);
 	    String[] brdopts={"3x3","4x4","5x5","6x6"};
@@ -95,7 +95,7 @@ public class CoTheActions {
 	String getImagename(){
 		Component fr_1 = null;
 		Object[] source = {"Default","Own"};
-		Object[] def = {"Pug","Porsche","Woods"};
+		Object[] def = {"Numbers","Pug","Porsche","Woods"};
 		String imageSource = (String)JOptionPane.showInputDialog(
                 fr_1,
                 "Image source:",
