@@ -1,1 +1,1 @@
-# first
+A mintakepek (blank.jpg-vel egyutt) a projektkonyvtarba mennek, nem a forrasokhoz!

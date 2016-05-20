@@ -81,7 +81,7 @@ public class GuiOfTheGame extends JFrame {
 		statusInf.add(othersMoves);
 		
 		JLabel othersGood = new JLabel("");
-		statusInf.add(othersGood);		
+		statusInf.add(othersGood);	
 		
 		JMenuBar mbarOfTheGame= new JMenuBar();
 		JMenu NGame = new JMenu("New game");
@@ -109,7 +109,7 @@ public class GuiOfTheGame extends JFrame {
 				modeOfGame.setText("Mode: single player");
 				othersMoves.setText("");
 				othersGood.setText("");
-				
+				split.startTimer();
 				split.multi=false;
 			}
 		});
@@ -119,38 +119,44 @@ public class GuiOfTheGame extends JFrame {
 		MultUser.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				imagename=InstCoTheActions.getImagename();
-				tableSize = InstCoTheActions.getTableParam();
+				if((split!=null)&&(split.multi))
+					split.disconnect();
 				
 				origPicField.removeAll();
-				origPicField.add(new JumbleImage(imagename, 180, tableSize));
-				JumbleImage temp = new JumbleImage(imagename, 375, tableSize);	// a Panel címe miatt nem fér ki a 400
-				split = temp;
-				split.jumble();
-				exerciseField.removeAll();
-				exerciseField.add(split);
-				revalidate();
-				repaint();
 				numberOfMoves.setText("Moves: 0");
 				timeFromGameStart.setText("Time: 0:00");
-				numberOfGood.setText("Pieces in the right place: " + split.check());
+				numberOfGood.setText("Pieces in the right place: ");
 				modeOfGame.setText("Mode: multiplayer");
 				othersMoves.setText("Opponent's moves:");
 				othersGood.setText("Opponent's right pieces:");
 				
-				split.multi=true;
-		
 				String[] s=InstCoTheActions.startMultiGame();
 				if(s[0].equals("Server")){
+					modeOfGame.setText("Mode: multiplayer (server)");
+					imagename=s[3];
+					tableSize=Integer.parseInt(s[4]);
+					split=new JumbleImage(imagename, 575, tableSize);
+					split.jumble();
+					split.multi=true;
 					split.client=false;
 					split.startServer(Integer.parseInt(s[2]));
-					modeOfGame.setText("Mode: multiplayer (server)");
 				}
 				else{
+					modeOfGame.setText("Mode: multiplayer (client)");
+					split=new JumbleImage();
+					split.multi=true;
 					split.client=true;
 					split.startClient(s[1],Integer.parseInt(s[2]));
-					modeOfGame.setText("Mode: multiplayer (client)");
 				}
+				while(!split.conn) ; ///////////////////////////////////////////// TODO: ide szalas megoldas kellene
+				imagename=split.imgadr;
+				split.startTimer();
+				origPicField.add(new JumbleImage(imagename, 180, 3));
+				numberOfGood.setText("Pieces in the right place: " + split.check());
+				exerciseField.removeAll();
+				exerciseField.add(split);
+				revalidate();
+				repaint();
 			}
 		});
 		NGame.add(MultUser);
@@ -214,7 +220,7 @@ public class GuiOfTheGame extends JFrame {
 				modeOfGame.setText("Mode: single player");
 				othersMoves.setText("");
 				othersGood.setText("");
-				
+				split.startTimer();
 				split.multi=false;
 			}
 		});
@@ -270,6 +276,7 @@ public class GuiOfTheGame extends JFrame {
 				exerciseField.repaint();
 				numberOfMoves.setText("Moves: " + split.getmoves());
 				numberOfGood.setText("Pieces in the right place: " + split.check());
+				
 				if(split.multi) split.send();
 			}
 		});
@@ -278,7 +285,7 @@ public class GuiOfTheGame extends JFrame {
 			  public void run() {
 				  if(split != null){
 					  timeFromGameStart.setText("Time: " + split.elapsedTime());
-					  if(split.multi){
+					  if((split.multi)&&(split.conn)){
 						  othersMoves.setText("Opponent's moves: "+split.getOppMoves());
 						  othersGood.setText("Opponent's right pieces: "+split.getOppRight());
 					  }

@@ -23,15 +23,30 @@ public class JumbleImage extends Component {
     int w, h, cw, ch, moves = 0, offset = 0, stop = 0;
     Instant start;
     Instant end;
-    boolean multi, client;
+    boolean multi, client, conn, started=false;
     private Network net = null;
     private int oppMoves=0, oppRight=0;
     String imgadr = "";
     
-    public JumbleImage(String cim, int maxsize, int pieces) {
-        if(imgadr != ""){
-        	cim = imgadr;
+    public JumbleImage(){
+        try {
+            blank = ImageIO.read(new File("blank.jpg"));
+        } catch (IOException e) {
+            System.out.println("Blank image could not be read");
+            // System.exit(1);
         }
+    }
+    
+    public JumbleImage(String cim, int maxsize, int pieces) {
+        this();
+        numlocs = pieces;
+        numcells = numlocs*numlocs;
+        cells = new int[numcells];
+        setImage(cim,maxsize);
+    }
+    
+    public void setImage(String cim, int maxsize){
+    	imgadr=cim;
     	try {
             bi = ImageIO.read(new File(cim));
         } catch (IOException e) {
@@ -46,32 +61,27 @@ public class JumbleImage extends Component {
         	bi = bi.getScaledInstance(-1, maxsize, Image.SCALE_SMOOTH);
         }
         offset = 0;
-        numlocs = pieces;
-        numcells = numlocs*numlocs;
         w = bi.getWidth(null);
         h = bi.getHeight(null);
         cw = w/numlocs;
         ch = h/numlocs;
-        cells = new int[numcells];
         completed = new int[numcells];
         for (int i=0;i<numcells;i++) {
             cells[i] = i;
             completed[i] = i;
         }
         
-        try {
-            blank = ImageIO.read(new File("blank.jpg"));
-        } catch (IOException e) {
-            System.out.println("Blank image could not be read");
-            // System.exit(1);
-        }
         if(w >= h){
         	blank = blank.getScaledInstance(maxsize, -1, Image.SCALE_SMOOTH);
         }
         else {
         	blank = blank.getScaledInstance(-1, maxsize, Image.SCALE_SMOOTH);
         }
-        start = Instant.now();
+    }
+    
+    void startTimer(){
+    	started=true;
+    	start = Instant.now();
     }
 
     void jumble() {
@@ -135,6 +145,8 @@ public class JumbleImage extends Component {
     	int[] time;
     	String result = "";
     	time = new int[3];
+    	if(started==false)
+    		return "0:00";
     	if(stop == 0){
     		end = Instant.now();
     	}
@@ -230,30 +242,30 @@ public class JumbleImage extends Component {
 	}
 	
     public void receive(String[] s){
-    	if(s.length == 1){ //ha egyelemu, akkor a kep neve van benne
-    		imgadr=s[0];
-    	}
-    	else if(s.length == 2){ //ha ketelemu, akkor az ellenfel allasa
+    	if(s.length==2){ //ha ketelemu, akkor az ellenfel allasa van benne
     		oppMoves=Integer.parseInt(s[0]);
     		oppRight=Integer.parseInt(s[1]);
     	}
-    	else{
-    		for(int i=0;i<s.length;i++){ //ha tobb, akkor a keveres
-    			cells[i]=Integer.parseInt(s[i]);
-    		}
+    	else{ //ha tobb, akkor a kep neve es a keveres
+    		imgadr=s[0];
+    		numlocs=Integer.parseInt(s[1]);
+            numcells = numlocs*numlocs;
+            cells = new int[numcells];
+			setImage(imgadr,575);
+			String[] c=s[2].split(",");
+    		for(int i=0;i<numcells;i++)
+    			cells[i]=Integer.parseInt(c[i]);
+    		conn=true;
     	}
     }
-    
-    public void sendImageName(String name){
-    	String[] s=new String[1];
-    	s[0]=name;
-    	net.send(s);
-    }
-    
-    public void sendState(){
-    	String[] s=new String[numcells];
+        
+    public void sendState(){ //elkuldi a kep nevet es a keverest
+    	String[] s=new String[3];
+    	s[0]=imgadr;
+    	s[1]=""+numlocs;
+    	s[2]="";
     	for(int i=0;i<numcells;i++){
-    		s[i]=""+cells[i];
+    		s[2]+=cells[i]+",";
     	}
     	net.send(s);
     }

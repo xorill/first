@@ -27,6 +27,10 @@ public class CoTheActions {
 	    panel.add(label,BorderLayout.WEST);
 	    label.add(new JLabel("Port:", SwingConstants.RIGHT));
 	    panel.add(label,BorderLayout.WEST);
+	    label.add(new JLabel("Image:", SwingConstants.RIGHT));
+	    panel.add(label,BorderLayout.WEST);
+	    label.add(new JLabel("Board size:", SwingConstants.RIGHT));
+	    panel.add(label,BorderLayout.WEST);
 
 	    JPanel controls = new JPanel(new GridLayout(0, 1, 2, 2));
 	    String[] opts={"Server","Client"};
@@ -34,27 +38,43 @@ public class CoTheActions {
 	    controls.add(mode);
 	    JTextField ip = new JTextField("127.0.0.1");
 	    controls.add(ip);
-	    panel.add(controls, BorderLayout.CENTER);
 	    ip.setEnabled(false);
+	    JTextField port = new JTextField("10007");
+	    controls.add(port);
+	    String[] imgopts={"Pug","Porsche","Woods"};
+	    JComboBox<String> imgsel = new JComboBox<String>(imgopts);
+	    controls.add(imgsel);
+	    String[] brdopts={"3x3","4x4","5x5","6x6"};
+	    JComboBox<String> brdset = new JComboBox<String>(brdopts);
+	    controls.add(brdset);
+	    panel.add(controls, BorderLayout.CENTER);
+	    
 	    mode.addActionListener(new ActionListener(){
 	    	@Override
 	    	public void actionPerformed(ActionEvent evObject){
-	    		if(mode.getSelectedIndex()==0)
+	    		if(mode.getSelectedIndex()==0){ //ha szerver, akkor nem lehet IP-t megadni
 	    			ip.setEnabled(false);
-	    		else
+	    			imgsel.setEnabled(true);
+	    			brdset.setEnabled(true);	    			
+	    		}
+	    		else{ //ha kliens, akkor nem lehet kepet es meretet valaszani
 	    			ip.setEnabled(true);
+	    			imgsel.setEnabled(false);
+	    			brdset.setEnabled(false);
+	    		}
 	    	}
 	    });
-	    JTextField port = new JTextField("10007");
-	    controls.add(port);
 
 	    JOptionPane.showMessageDialog(null, panel, "Start Multiplayer", JOptionPane.QUESTION_MESSAGE);
 	    
-	    String[] s=new String[3];
-	    s[0]=(String)mode.getSelectedItem();
-	    s[1]=(String)ip.getText();
-	    s[2]=(String)port.getText();
-	    
+	    String[] s=new String[5];
+	    s[0]=(String)mode.getSelectedItem(); //elso helyen: Server vagy Client
+	    s[1]=(String)ip.getText(); //masodik helyen: IP cim
+	    s[2]=(String)port.getText(); //harmadik helyen: port
+	    s[3]=(String)imgsel.getSelectedItem();
+	    s[3]=s[3].toLowerCase()+".jpg"; //negyedik helyen: kepfajl neve
+	    s[4]=(String)brdset.getSelectedItem();
+	    s[4]=s[4].substring(0,1); //otodik helyen: egy szam (3-6), a keveres merete
 	    return s;
 	}
 

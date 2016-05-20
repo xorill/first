@@ -45,6 +45,9 @@ public class NetworkServer extends Network {
 			}
 
 			try {
+				Thread.sleep(100);
+				jumb.sendState();
+				jumb.conn=true;
 				while (true) {
 					String[] received = (String[]) in.readObject();
 					jumb.receive(received);
