@@ -93,15 +93,39 @@ public class CoTheActions {
 	
 	
 	String getImagename(){
-		
 		Component fr_1 = null;
-		String defaultLocation_image = "";
-		String file_n = File.separator + defaultLocation_image;
-		JFileChooser filech = new JFileChooser(new File(file_n));
-		filech.setDialogTitle("Select a picture");
-		filech.showOpenDialog(fr_1);
-		System.out.println(filech.getSelectedFile().getAbsolutePath());
-		return filech.getSelectedFile().getAbsolutePath();
+		Object[] source = {"Default","Own"};
+		Object[] def = {"Pug","Porsche","Woods"};
+		String imageSource = (String)JOptionPane.showInputDialog(
+                fr_1,
+                "Image source:",
+                "Select image source",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                source,
+                source[0]);	
+		if(imageSource=="Default"){
+			String image = (String)JOptionPane.showInputDialog(
+	                fr_1,
+	                "Image:",
+	                "Select image",
+	                JOptionPane.PLAIN_MESSAGE,
+	                null,
+	                def,
+	                def[0]);
+			return image.toLowerCase()+".jpg";
+		}
+		else if(imageSource=="Own"){
+			fr_1 = null;
+			String defaultLocation_image = "";
+			String file_n = File.separator + defaultLocation_image;
+			JFileChooser filech = new JFileChooser(new File(file_n));
+			filech.setDialogTitle("Select a picture");
+			filech.showOpenDialog(fr_1);
+			System.out.println(filech.getSelectedFile().getAbsolutePath());
+			return filech.getSelectedFile().getAbsolutePath();
+		}
+		return "error";
 	}
 	
 	String getPlayername(){
