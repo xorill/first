@@ -20,10 +20,10 @@ public class JumbleImage extends Component {
     private int[] completed;
     private Image bi;
     private Image blank;
-    int w, h, cw, ch, moves = 0, offset = 0, stop = 0;
+    int w, h, cw, ch, moves = 0, offset = 0;
     Instant start;
     Instant end;
-    boolean multi, client, conn, started=false;
+    boolean multi, client, conn, started=false, stop=false;
     private Network net = null;
     private int oppMoves=0, oppRight=0;
     String imgadr = "";
@@ -94,10 +94,10 @@ public class JumbleImage extends Component {
             cells[i] = cells[ri];
             cells[ri] = tmp;
         }
-        stop = 0;
+        stop = false;
     }
-    // x,y a képrészlet koordinátái, amire kattintottunk
-    // tx,ty a "szürke" képrészlet koordinátái
+    // x,y a kĂ©prĂ©szlet koordinĂˇtĂˇi, amire kattintottunk
+    // tx,ty a "szĂĽrke" kĂ©prĂ©szlet koordinĂˇtĂˇi
     public void move(int x, int y) {
     	int tx = 0, ty = 0, ok = 0;
     	
@@ -137,7 +137,7 @@ public class JumbleImage extends Component {
     			}
     		}
     	}
-    	if(good == numcells) stop = 1;
+    	if(good == numcells) stop = true;
     	return good;
     }
     
@@ -147,7 +147,7 @@ public class JumbleImage extends Component {
     	time = new int[3];
     	if(started==false)
     		return "0:00";
-    	if(stop == 0){
+    	if(stop == false){
     		end = Instant.now();
     	}
     	long s = Duration.between(start, end).getSeconds() + offset;
@@ -197,8 +197,8 @@ public class JumbleImage extends Component {
         return new Dimension(w, h);
     }
 
-    // sx,sy az eredeti képen hol van a képrészlet
-    // dx,dy ahova a képrészletet rakni akarjuk
+    // sx,sy az eredeti kĂ©pen hol van a kĂ©prĂ©szlet
+    // dx,dy ahova a kĂ©prĂ©szletet rakni akarjuk
     public void paint(Graphics g) {
         int sx, sy;
         for (int x=0; x<numlocs; x++) {
