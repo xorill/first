@@ -26,6 +26,7 @@ public class NetworkClient extends Network {
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 				System.err.println("Server disconnected!");
+				JOptionPane.showMessageDialog(null,"Server disconnected!","Error",JOptionPane.ERROR_MESSAGE);
 			} finally {
 				disconnect();
 			}
