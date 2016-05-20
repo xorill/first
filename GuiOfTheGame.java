@@ -22,6 +22,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+
 import javax.swing.JLabel;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -96,7 +98,7 @@ public class GuiOfTheGame extends JFrame {
 				
 				origPicField.removeAll();
 				origPicField.add(new JumbleImage(imagename, 180, tableSize));
-				JumbleImage temp = new JumbleImage(imagename, 575, tableSize);	// a Panel címe miatt nem fér ki a 400
+				JumbleImage temp = new JumbleImage(imagename, 575, tableSize);	// a Panel cĂ­me miatt nem fĂ©r ki a 400
 				split = temp;
 				split.jumble();
 				exerciseField.removeAll();
@@ -271,12 +273,18 @@ public class GuiOfTheGame extends JFrame {
 			@Override
 			public void mousePressed(MouseEvent evObject) {
 				//InstCoTheActions.mouseEvent(new Point(evObject.getX(), evObject.getY()));
-				split.move(evObject.getX()-5, evObject.getY()-18);	// pontosan az egér hegyére igazítás
+				Component fr_1 = null;
+				split.move(evObject.getX()-5, evObject.getY()-18);	// pontosan az egĂ©r hegyĂ©re igazĂ­tĂˇs
 				exerciseField.add(split);
 				exerciseField.repaint();
 				numberOfMoves.setText("Moves: " + split.getmoves());
 				numberOfGood.setText("Pieces in the right place: " + split.check());
-				
+				if(split.stop) JOptionPane.showMessageDialog(
+		                fr_1,
+		                "Your stats:\nMoves: " + split.getmoves() + "\nTime: " + split.elapsedTime(),
+		                "You win!",
+		                JOptionPane.PLAIN_MESSAGE,
+		                null);	
 				if(split.multi) split.send();
 			}
 		});
