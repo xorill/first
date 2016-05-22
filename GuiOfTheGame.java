@@ -36,12 +36,28 @@ public class GuiOfTheGame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private CoTheActions InstCoTheActions;
+	private String imagename = "";
+	private String playerName = "";
+	private String loadedGame = "";
+	private int tableSize;
+	private JPanel exerciseField, origPicField;
+	private JLabel numberOfGood;
 	JumbleImage split = null;
-	String imagename = "";
-	String playerName = "";
-	String loadedGame = "";
-	int tableSize;
-
+	
+	private class WaiterThread implements Runnable {
+		public void run(){
+			while(!split.isConnected()) ;
+			imagename=split.imgadr;
+			split.startTimer();
+			origPicField.add(new JumbleImage(imagename, 180, 3));
+			numberOfGood.setText("Pieces in the right place: " + split.check());
+			exerciseField.removeAll();
+			exerciseField.add(split);
+			revalidate();
+			repaint();
+		}
+	}
+	
 	GuiOfTheGame(CoTheActions Co) {
 		
 		super("Tili toli");
@@ -51,12 +67,12 @@ public class GuiOfTheGame extends JFrame {
 		setLayout(null);
 		Timer timer = new Timer();
 		
-		JPanel exerciseField = new JPanel(new BorderLayout());
+		exerciseField = new JPanel(new BorderLayout());
 		exerciseField.setBounds(30, 30, 600, 600);
 		exerciseField.setBorder(BorderFactory.createTitledBorder("Exercise"));
 		add(exerciseField);
 		
-		JPanel origPicField = new JPanel(new BorderLayout());
+		origPicField = new JPanel(new BorderLayout());
 		origPicField.setBounds(670,430 , 200, 200);
 		origPicField.setBorder(BorderFactory.createTitledBorder("Original Picture"));
 		add(origPicField);
@@ -73,7 +89,7 @@ public class GuiOfTheGame extends JFrame {
 	    JLabel numberOfMoves = new JLabel("Moves:");
 		statusInf.add(numberOfMoves);
 		
-		JLabel numberOfGood = new JLabel("Pieces in the right place: ");
+		numberOfGood = new JLabel("Pieces in the right place: ");
 		statusInf.add(numberOfGood);
 		
 		JLabel modeOfGame = new JLabel("Mode: ");
@@ -112,16 +128,17 @@ public class GuiOfTheGame extends JFrame {
 				othersMoves.setText("");
 				othersGood.setText("");
 				split.startTimer();
-				split.multi=false;
+				split.setMulti(false);
 			}
 		});
 		NGame.add(SingleUser);
 		
 		JMenuItem MultUser = new JMenuItem("Multi User");
+
 		MultUser.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				if((split!=null)&&(split.multi))
+				if((split!=null)&&(split.isMulti()))
 					split.disconnect();
 				
 				origPicField.removeAll();
@@ -139,26 +156,19 @@ public class GuiOfTheGame extends JFrame {
 					tableSize=Integer.parseInt(s[4]);
 					split=new JumbleImage(imagename, 575, tableSize);
 					split.jumble();
-					split.multi=true;
+					split.setMulti(true);
 					split.client=false;
 					split.startServer(Integer.parseInt(s[2]));
 				}
 				else{
 					modeOfGame.setText("Mode: multiplayer (client)");
 					split=new JumbleImage();
-					split.multi=true;
+					split.setMulti(true);
 					split.client=true;
 					split.startClient(s[1],Integer.parseInt(s[2]));
 				}
-				while(!split.conn) ; ///////////////////////////////////////////// TODO: ide szalas megoldas kellene
-				imagename=split.imgadr;
-				split.startTimer();
-				origPicField.add(new JumbleImage(imagename, 180, 3));
-				numberOfGood.setText("Pieces in the right place: " + split.check());
-				exerciseField.removeAll();
-				exerciseField.add(split);
-				revalidate();
-				repaint();
+				Thread wt=new Thread(new WaiterThread()); //varakozunk a kapcsolatra
+				wt.start();
 			}
 		});
 		NGame.add(MultUser);
@@ -180,7 +190,7 @@ public class GuiOfTheGame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
 				InstCoTheActions.startDisconnect();
-				if((split!=null)&&(split.multi))split.disconnect();
+				if((split!=null)&&(split.isMulti()))split.disconnect();
 			}
 		});
 		Options.add(Disconn);
@@ -208,7 +218,7 @@ public class GuiOfTheGame extends JFrame {
 			    content = content.substring(content.indexOf(',')+1);
 			    origPicField.removeAll();
 				origPicField.add(new JumbleImage(imagename, 180, Integer.parseInt(content.substring(0,content.indexOf(',')))));
-				JumbleImage temp = new JumbleImage(imagename, 375, Integer.parseInt(content.substring(0,content.indexOf(','))));
+				JumbleImage temp = new JumbleImage(imagename, 575, Integer.parseInt(content.substring(0,content.indexOf(','))));
 				split = temp;
 				content = content.substring(content.indexOf(',')+1);
 				split.loadState(content);
@@ -223,7 +233,7 @@ public class GuiOfTheGame extends JFrame {
 				othersMoves.setText("");
 				othersGood.setText("");
 				split.startTimer();
-				split.multi=false;
+				split.setMulti(false);
 			}
 		});
 		Options.add(Load);
@@ -234,7 +244,7 @@ public class GuiOfTheGame extends JFrame {
 			public void actionPerformed(ActionEvent evObject) {
 				if(split==null)
 					return;
-				if(split.multi){
+				if(split.isMulti()){
 					JOptionPane.showMessageDialog(null,"Cannot save game in multiplayer mode!","Sorry",JOptionPane.ERROR_MESSAGE);
 					return;
 				}
@@ -285,7 +295,7 @@ public class GuiOfTheGame extends JFrame {
 		                "You win!",
 		                JOptionPane.PLAIN_MESSAGE,
 		                null);	
-				if(split.multi) split.send();
+				if(split.isMulti()) split.send();
 			}
 		});
 		
@@ -293,7 +303,7 @@ public class GuiOfTheGame extends JFrame {
 			  public void run() {
 				  if(split != null){
 					  timeFromGameStart.setText("Time: " + split.elapsedTime());
-					  if((split.multi)&&(split.conn)){
+					  if((split.isMulti())&&(split.isConnected())){
 						  othersMoves.setText("Opponent's moves: "+split.getOppMoves());
 						  othersGood.setText("Opponent's right pieces: "+split.getOppRight());
 					  }
