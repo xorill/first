@@ -20,10 +20,11 @@ public class JumbleImage extends Component {
     private int[] completed;
     private Image bi;
     private Image blank;
+    private Image numbered;
     int w, h, cw, ch, moves = 0, offset = 0;
     Instant start;
     Instant end;
-    boolean client, started=false;
+    boolean client, started=false, numbers=false;
     private volatile boolean conn=false;
     private boolean multi, stop=false;
     private Network net = null;
@@ -48,7 +49,16 @@ public class JumbleImage extends Component {
     }
     
     public void setImage(String cim, int maxsize){
+    	if(cim.indexOf("numbers")>=0){
+    		cim="numbers" + numlocs + "x"+ numlocs + ".png";
+    	}
     	imgadr=cim;
+    	try {
+            numbered = ImageIO.read(new File(numlocs + "x"+ numlocs + ".png"));
+        } catch (IOException e) {
+            System.out.println("Numbered image could not be read");
+            // System.exit(1);
+        }
     	try {
             bi = ImageIO.read(new File(cim));
         } catch (IOException e) {
@@ -79,6 +89,7 @@ public class JumbleImage extends Component {
         else {
         	blank = blank.getScaledInstance(-1, maxsize, Image.SCALE_SMOOTH);
         }
+        numbered = numbered.getScaledInstance(w, h, Image.SCALE_SMOOTH);
     }
     
     void startTimer(){
@@ -89,17 +100,41 @@ public class JumbleImage extends Component {
     void jumble() {
         Random rand = new Random();
         int ri;
-        for (int i=0; i<numcells; i++) {
-            while ((ri = rand.nextInt(numlocs)) == i);
-
-            int tmp = cells[i];
-            cells[i] = cells[ri];
-            cells[ri] = tmp;
+        int to=0;
+        int blank=numcells-1;
+        int tmp;
+        while(check()>0.2*numcells){
+	        for (int i=0; i<40; i++) {
+	        	ri = rand.nextInt(4);
+	        	switch (ri){
+		        	case 0:
+		        		if(blank-numlocs >= 0) to=blank-numlocs;
+		        		else blank=to;
+		        		break;
+		        	case 1:
+		        		if(blank-1 >= 0) to=blank-1;
+		        		else blank=to;
+		        		break;
+		        	case 2:
+		        		if(blank+1 <= numcells-1) to=blank+1;
+		        		else blank=to;
+		        		break;
+		        	case 3:
+		        		if(blank+numlocs <= numcells-1) to=blank+numlocs;
+		        		else blank=to;
+		        		break;
+	        	}
+	        	tmp = cells[to];
+                cells[to] = cells[blank];
+                cells[blank] = tmp;
+                blank=to;
+	        }
+            
         }
         stop = false;
     }
-    // x,y a kĂ©prĂ©szlet koordinĂˇtĂˇi, amire kattintottunk
-    // tx,ty a "szĂĽrke" kĂ©prĂ©szlet koordinĂˇtĂˇi
+    // x,y a kÄ‚Â©prÄ‚Â©szlet koordinÄ‚Ë‡tÄ‚Ë‡i, amire kattintottunk
+    // tx,ty a "szÄ‚Ä˝rke" kÄ‚Â©prÄ‚Â©szlet koordinÄ‚Ë‡tÄ‚Ë‡i
     public void move(int x, int y) {
     	int tx = 0, ty = 0, ok = 0;
     	
@@ -199,8 +234,8 @@ public class JumbleImage extends Component {
         return new Dimension(w, h);
     }
 
-    // sx,sy az eredeti kĂ©pen hol van a kĂ©prĂ©szlet
-    // dx,dy ahova a kĂ©prĂ©szletet rakni akarjuk
+    // sx,sy az eredeti kepen hol van a kepreszlet
+    // dx,dy ahova a kepreszletet rakni akarjuk
     public void paint(Graphics g) {
         int sx, sy;
         for (int x=0; x<numlocs; x++) {
@@ -218,6 +253,11 @@ public class JumbleImage extends Component {
                 }
                 else {
                 	g.drawImage(bi,
+                            dx, dy, dx+cw, dy+ch,
+                            sx, sy, sx+cw, sy+ch,
+                            null);
+                	if(numbers==true)
+                		g.drawImage(numbered,
                             dx, dy, dx+cw, dy+ch,
                             sx, sy, sx+cw, sy+ch,
                             null);
