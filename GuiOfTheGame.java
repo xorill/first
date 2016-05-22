@@ -44,6 +44,7 @@ public class GuiOfTheGame extends JFrame {
 	private JPanel exerciseField, origPicField;
 	private JLabel numberOfGood;
 	JumbleImage split = null;
+	JButton showNumbers;
 	
 	private class WaiterThread implements Runnable {
 		public void run(){
@@ -56,6 +57,8 @@ public class GuiOfTheGame extends JFrame {
 			exerciseField.add(split);
 			revalidate();
 			repaint();
+			if(split.imgadr.indexOf("numbers")>=0) showNumbers.setEnabled(false);
+			else showNumbers.setEnabled(true);
 		}
 	}
 	
@@ -102,7 +105,7 @@ public class GuiOfTheGame extends JFrame {
 		JLabel othersGood = new JLabel("");
 		statusInf.add(othersGood);	
 		
-		JButton showNumbers = new JButton("Numbers");
+		showNumbers = new JButton("Numbers");
 		showNumbers.setEnabled(false);
 		showNumbers.addActionListener(new ActionListener() {
 			@Override
@@ -191,9 +194,6 @@ public class GuiOfTheGame extends JFrame {
 					split.client=true;
 					split.startClient(s[1],Integer.parseInt(s[2]));
 				}
-				while(split.isConnected()==false);
-				if(split.imgadr.indexOf("numbers")>=0) showNumbers.setEnabled(false);
-				else showNumbers.setEnabled(true);
 				Thread wt=new Thread(new WaiterThread()); //varakozunk a kapcsolatra
 				wt.start();
 			}
