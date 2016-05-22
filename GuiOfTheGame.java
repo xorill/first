@@ -289,13 +289,15 @@ public class GuiOfTheGame extends JFrame {
 				exerciseField.repaint();
 				numberOfMoves.setText("Moves: " + split.getmoves());
 				numberOfGood.setText("Pieces in the right place: " + split.check());
-				if(split.stop) JOptionPane.showMessageDialog(
+				if(split.isMulti()) {	
+					split.send();
+				}
+				if(split.getStop()) JOptionPane.showMessageDialog(
 		                fr_1,
 		                "Your stats:\nMoves: " + split.getmoves() + "\nTime: " + split.elapsedTime(),
 		                "You win!",
 		                JOptionPane.PLAIN_MESSAGE,
 		                null);	
-				if(split.isMulti()) split.send();
 			}
 		});
 		
@@ -303,9 +305,13 @@ public class GuiOfTheGame extends JFrame {
 			  public void run() {
 				  if(split != null){
 					  timeFromGameStart.setText("Time: " + split.elapsedTime());
-					  if((split.isMulti())&&(split.isConnected())){
+					  if((split.isMulti())&&(split.isConnected())&&(!split.getStop())){
 						  othersMoves.setText("Opponent's moves: "+split.getOppMoves());
 						  othersGood.setText("Opponent's right pieces: "+split.getOppRight());
+						  if(Integer.parseInt(split.getOppRight())==split.getNumCells()){
+							  JOptionPane.showMessageDialog(null,"You lose!");
+							  split.setStop(true);
+						  }
 					  }
 				  }
 			  }

@@ -23,9 +23,9 @@ public class JumbleImage extends Component {
     int w, h, cw, ch, moves = 0, offset = 0;
     Instant start;
     Instant end;
-    boolean client, started=false, stop=false;
+    boolean client, started=false;
     private volatile boolean conn=false;
-    private boolean multi;
+    private boolean multi, stop=false;
     private Network net = null;
     private int oppMoves=0, oppRight=0;
     String imgadr = "";
@@ -301,6 +301,18 @@ public class JumbleImage extends Component {
     
     public void setConnected(boolean b){
     	conn=b;
+    }
+    
+    public int getNumCells(){
+    	return numcells;
+    }
+    
+    public void setStop(boolean b){
+    	stop=b;
+    }
+    
+    public boolean getStop(){
+    	return stop;
     }
     
 }
