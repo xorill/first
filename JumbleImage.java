@@ -241,6 +241,7 @@ public class JumbleImage extends Component {
     
 	void disconnect(){
 		net.disconnect();
+		conn=false;
 	}
 	
     public void receive(String[] s){

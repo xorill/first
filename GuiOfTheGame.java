@@ -138,10 +138,12 @@ public class GuiOfTheGame extends JFrame {
 		MultUser.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evObject) {
-				if((split!=null)&&(split.isMulti()))
+				if((split!=null)&&(split.isMulti()&&(split.isConnected())))
 					split.disconnect();
-				
+				exerciseField.removeAll();
 				origPicField.removeAll();
+				revalidate();
+				repaint();
 				numberOfMoves.setText("Moves: 0");
 				timeFromGameStart.setText("Time: 0:00");
 				numberOfGood.setText("Pieces in the right place: ");
