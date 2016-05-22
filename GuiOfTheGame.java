@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -79,7 +80,7 @@ public class GuiOfTheGame extends JFrame {
 		
 		JPanel statusInf = new JPanel();
 		statusInf.setLayout(new BoxLayout(statusInf, BoxLayout.PAGE_AXIS));
-		statusInf.setBounds(670,30 , 200, 400);
+		statusInf.setBounds(670,30 , 200, 150);
 		statusInf.setBorder(BorderFactory.createTitledBorder("Status of the game"));
 		add(statusInf);
 		
@@ -101,6 +102,25 @@ public class GuiOfTheGame extends JFrame {
 		JLabel othersGood = new JLabel("");
 		statusInf.add(othersGood);	
 		
+		JButton showNumbers = new JButton("Numbers");
+		showNumbers.setEnabled(false);
+		showNumbers.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent evObject) {
+				if(split==null);
+				else if(split.numbers==false){
+					split.numbers=true;
+					exerciseField.repaint();
+				}
+				else {
+					split.numbers=false;
+					exerciseField.repaint();
+				}
+			}
+		});
+		statusInf.add(showNumbers);
+		
+		
 		JMenuBar mbarOfTheGame= new JMenuBar();
 		JMenu NGame = new JMenu("New game");
 
@@ -114,7 +134,7 @@ public class GuiOfTheGame extends JFrame {
 				
 				origPicField.removeAll();
 				origPicField.add(new JumbleImage(imagename, 180, tableSize));
-				JumbleImage temp = new JumbleImage(imagename, 575, tableSize);	// a Panel cĂ­me miatt nem fĂ©r ki a 400
+				JumbleImage temp = new JumbleImage(imagename, 575, tableSize);	// a Panel cÄ‚Â­me miatt nem fÄ‚Â©r ki a 400
 				split = temp;
 				split.jumble();
 				exerciseField.removeAll();
@@ -129,6 +149,8 @@ public class GuiOfTheGame extends JFrame {
 				othersGood.setText("");
 				split.startTimer();
 				split.setMulti(false);
+				if(split.imgadr.indexOf("numbers")>=0) showNumbers.setEnabled(false);
+				else showNumbers.setEnabled(true);
 			}
 		});
 		NGame.add(SingleUser);
@@ -169,6 +191,9 @@ public class GuiOfTheGame extends JFrame {
 					split.client=true;
 					split.startClient(s[1],Integer.parseInt(s[2]));
 				}
+				while(split.isConnected()==false);
+				if(split.imgadr.indexOf("numbers")>=0) showNumbers.setEnabled(false);
+				else showNumbers.setEnabled(true);
 				Thread wt=new Thread(new WaiterThread()); //varakozunk a kapcsolatra
 				wt.start();
 			}
@@ -285,8 +310,9 @@ public class GuiOfTheGame extends JFrame {
 			@Override
 			public void mousePressed(MouseEvent evObject) {
 				//InstCoTheActions.mouseEvent(new Point(evObject.getX(), evObject.getY()));
+				if(split.getStop()==true) return;
 				Component fr_1 = null;
-				split.move(evObject.getX()-5, evObject.getY()-18);	// pontosan az egĂ©r hegyĂ©re igazĂ­tĂˇs
+				split.move(evObject.getX()-5, evObject.getY()-18);	// pontosan az egÄ‚Â©r hegyÄ‚Â©re igazÄ‚Â­tÄ‚Ë‡s
 				exerciseField.add(split);
 				exerciseField.repaint();
 				numberOfMoves.setText("Moves: " + split.getmoves());
