@@ -83,12 +83,7 @@ public class JumbleImage extends Component {
             completed[i] = i;
         }
         
-        if(w >= h){
-        	blank = blank.getScaledInstance(maxsize, -1, Image.SCALE_SMOOTH);
-        }
-        else {
-        	blank = blank.getScaledInstance(-1, maxsize, Image.SCALE_SMOOTH);
-        }
+        blank = blank.getScaledInstance(w, h, Image.SCALE_SMOOTH);
         numbered = numbered.getScaledInstance(w, h, Image.SCALE_SMOOTH);
     }
     
