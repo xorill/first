@@ -24,13 +24,48 @@ public class JumbleImage extends Component {
     int w, h, cw, ch, moves = 0, offset = 0;
     Instant start;
     Instant end;
-    boolean client, started=false, numbers=false;
-    private volatile boolean conn=false;
-    private boolean multi, stop=false;
+    
+    /**
+     * A hálózatkezelést megvalósító objektum (multiplayer mód esetén).
+     */
     private Network net = null;
-    private int oppMoves=0, oppRight=0;
+
+    /**
+     * True, ha multiplayer módban vagyunk, különben false.
+     */
+    private boolean multi;
+    
+    /**
+     * True, ha elkezdõdött a játék, különben false.
+     */
+    private boolean started=false;
+    
+    /**
+     * Multiplayer módban jelzi, hogy van-e élõ kapcsolat. (Volatile, mert a hálózati szál állítja!)
+     */
+    private volatile boolean conn=false;
+    
+    /**
+     * Multiplayer módban az ellenfél lépéseinek száma.
+     */
+    private int oppMoves=0;
+    
+    /**
+     * Multiplayer módban az ellenfél jó helyen lévõ elemeinek száma.
+     */
+    private int oppRight=0;
+    
+    boolean numbers=false;
+    private boolean stop=false;
     String imgadr = "";
     
+    
+    
+    /**
+     * Paraméter nélküli konstruktor.
+     * <p>
+     * Létrehoz egy objektumot, de a képet és a tábla méretét még késõbb definiálni kell.
+     */
     public JumbleImage(){
         try {
             blank = ImageIO.read(new File("blank.jpg"));
@@ -40,6 +75,15 @@ public class JumbleImage extends Component {
         }
     }
     
+    /**
+     * Paraméteres konstruktor.
+     * <p>
+     * Létrehoz egy objektumot, megnyitja a megadott képet, beállítja a tábla méretét.
+     * 
+     * @param cim a képfájl neve
+     * @param maxsize a kirajzolt kép mérete
+     * @param pieces a tábla mérete
+     */
     public JumbleImage(String cim, int maxsize, int pieces) {
         this();
         numlocs = pieces;
@@ -48,6 +92,12 @@ public class JumbleImage extends Component {
         setImage(cim,maxsize);
     }
     
+    /**
+     * Beállítja a megadott képet.
+     * 
+     * @param cim a képfájl neve
+     * @param maxsize a kirajzolt kép mérete
+     */
     public void setImage(String cim, int maxsize){
     	if(cim.indexOf("numbers")>=0){
     		cim="numbers" + numlocs + "x"+ numlocs + ".png";
@@ -87,6 +137,9 @@ public class JumbleImage extends Component {
         numbered = numbered.getScaledInstance(w, h, Image.SCALE_SMOOTH);
     }
     
+    /**
+     * Elindítja az idõzítõt.
+     */
     void startTimer(){
     	started=true;
     	start = Instant.now();
@@ -260,6 +313,12 @@ public class JumbleImage extends Component {
             }
         }
     }
+    
+    /**
+     * Multiplayer mód indítása szerverként. 
+     * <p>
+     * @param port - ezen a porton várjuk a klienst
+     */
     void startServer(int port) {
 		if (net != null)
 			net.disconnect();
@@ -267,6 +326,12 @@ public class JumbleImage extends Component {
 		net.connect("localhost",port);
 	}
 
+    /**
+     * Multiplayer mód indítása kliensként. 
+     * <p>
+     * @param ip - a szerver IP címe
+     * @param port - ezen a porton csatlakozunk a szerverhez
+     */
 	void startClient(String ip, int port) {
 		if (net != null)
 			net.disconnect();
@@ -274,11 +339,22 @@ public class JumbleImage extends Component {
 		net.connect(ip,port);
 	}
     
+    /**
+     * Multiplayer módban a hálózati kapcsolat bontása.
+     */
 	void disconnect(){
 		net.disconnect();
 		conn=false;
 	}
 	
+    /**
+     * Hálózati vétel. 
+     * <p>
+     * Multiplayer módban van jelentõsége: feldolgozza a vett adatokat. Ez lehet
+     * az ellenfél állása, illetve kliens esetén a kép neve és a kezdeti keverés.
+     * 
+     * @param s a vett sztring tömb
+     */
     public void receive(String[] s){
     	if(s.length==2){ //ha ketelemu, akkor az ellenfel allasa van benne
     		oppMoves=Integer.parseInt(s[0]);
@@ -297,6 +373,12 @@ public class JumbleImage extends Component {
     	}
     }
         
+    /**
+     * Elküldi a kép nevét és a keverést. 
+     * <p>
+     * Multiplayer módban, szerver szerepben van jelentõsége: ez biztosítja, hogy
+     * mindkét fél ugyanazon a képen dolgozzon, ugyanazzal a keveréssel.
+     */
     public void sendState(){ //elkuldi a kep nevet es a keverest
     	String[] s=new String[3];
     	s[0]=imgadr;
@@ -308,6 +390,12 @@ public class JumbleImage extends Component {
     	net.send(s);
     }
     
+    /**
+     * Lépések és helyben lévõ elemek számának küldése. 
+     * <p>
+     * Multiplayer módban van jelentõsége: elküldi az ellenfélnek, hogy hány elemet
+     * mozgattunk már meg, és éppen mennyi van a helyén.
+     */
     public void send(){
     	String[] s=new String[2];
     	s[0]=""+getmoves();
@@ -315,38 +403,86 @@ public class JumbleImage extends Component {
     	net.send(s);
     }
     
+    /**
+     * Getter az oppMoves változóhoz.
+     * <p>
+     * Multiplayer módban van jelentõsége: jelzi, hogy az ellenfél hány elemet mozgatott már meg.
+     * @return az ellenfél lépéseinek száma sztringként
+     */
     public String getOppMoves(){
     	return ""+oppMoves;
     }
     
+    /**
+     * Getter az oppRight változóhoz.
+     * <p>
+     * Multiplayer módban van jelentõsége: jelzi, hogy az ellenfél hány elemet tett már a helyére.
+     * @return az ellenfél jó helyen lévõ elemeinek száma sztringként
+     */
     public String getOppRight(){
     	return ""+oppRight;
     }
     
+    /**
+     * Getter a multi változóhoz.
+     * @return true, ha multiplayer módban vagyunk, különben false
+     */
     public boolean isMulti(){
     	return multi;
     }
-    
+
+    /**
+     * Setter a multi változóhoz.
+     * <p>
+     * Ezzel jelezhetjük, hogy multiplayer módban vagyunk-e.
+     * @param b beállítja a multi változót
+     */
     public void setMulti(boolean b){
     	multi=b;
     }
     
+    /**
+     * Getter a conn változóhoz.
+     * <p>
+     * Multiplayer módban van jelentõsége: jelzi, hogy éppen van-e élõ kapcsolat.
+     * @return true, ha van élõ kapcsolat, különben false
+     */
     public boolean isConnected(){
     	return conn;
     }
     
+    /**
+     * Setter a conn változóhoz.
+     * <p>
+     * Multiplayer módban van jelentõsége: ezzel jelezhetjük, hogy éppen van-e élõ kapcsolat.
+     * @param b beállítja a conn változót
+     */
     public void setConnected(boolean b){
     	conn=b;
     }
     
+    /**
+     * Getter a numcells változóhoz.
+     * @return a cellák száma
+     */
     public int getNumCells(){
     	return numcells;
     }
     
+    /**
+     * Setter a stop változóhoz.
+     * <p>
+     * A stop változó igazra állításával a játék megállítható.
+     * @param b beállítja a stop változót
+     */
     public void setStop(boolean b){
     	stop=b;
     }
-    
+
+    /**
+     * Getter a stop változóhoz.
+     * @return true, ha áll a játék, különben false
+     */
     public boolean getStop(){
     	return stop;
     }

@@ -46,6 +46,9 @@ public class GuiOfTheGame extends JFrame {
 	JumbleImage split = null;
 	JButton showNumbers;
 	
+	/**
+	 * Ez a szál várakozik a kapcsolódásra multiplayer módban.
+	 */
 	private class WaiterThread implements Runnable {
 		public void run(){
 			while(!split.isConnected()) ;
@@ -184,14 +187,12 @@ public class GuiOfTheGame extends JFrame {
 					split=new JumbleImage(imagename, 575, tableSize);
 					split.jumble();
 					split.setMulti(true);
-					split.client=false;
 					split.startServer(Integer.parseInt(s[2]));
 				}
 				else{
 					modeOfGame.setText("Mode: multiplayer (client)");
 					split=new JumbleImage();
 					split.setMulti(true);
-					split.client=true;
 					split.startClient(s[1],Integer.parseInt(s[2]));
 				}
 				Thread wt=new Thread(new WaiterThread()); //varakozunk a kapcsolatra

@@ -10,17 +10,53 @@ import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
+/**
+ * 
+ * Hálózati interfész szerver módban.
+ * <p>
+ * A {@link Network} absztrakt osztály kiterjesztése.
+ * 
+ * @author Laczó Gyula
+ * @author Varga Balázs
+ * @author Winkelman Viktor
+ *
+ */
 public class NetworkServer extends Network {
 
+	/**
+	 * Szerver socket objektum.
+	 */
 	private ServerSocket serverSocket = null;
+	
+	/**
+	 * Kliens socket objektum.
+	 */
 	private Socket clientSocket = null;
+	
+	/**
+	 * Kimeneti adatfolyam.
+	 */
 	private ObjectOutputStream out = null;
+	
+	/**
+	 * Bemeneti adatfolyam.
+	 */
 	private ObjectInputStream in = null;
 
+	
+	
+	/**
+	 * Konstruktor.
+	 * 
+	 * @param j JumbleImage objektum, amellyel össze lesz kapcsolva az osztály adott példánya
+	 */
 	NetworkServer(JumbleImage j) {
 		super(j);
 	}
 
+	/**
+	 * Vételt megvalósító szál, végtelen ciklusban vár a beérkezõ adatokra. 
+	 */
 	private class ReceiverThread implements Runnable {
 
 		public void run() {
@@ -62,6 +98,9 @@ public class NetworkServer extends Network {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	void connect(String ip, int port) {
 		disconnect();
@@ -76,6 +115,9 @@ public class NetworkServer extends Network {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	void send(String[] s) {
 		if (out == null)
@@ -88,6 +130,9 @@ public class NetworkServer extends Network {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	void disconnect() {
 		try {

@@ -4,16 +4,48 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane;
 
+/**
+ * 
+ * Hálózati interfész kliens módban.
+ * <p>
+ * A {@link Network} absztrakt osztály kiterjesztése.
+ * 
+ * @author Laczó Gyula
+ * @author Varga Balázs
+ * @author Winkelman Viktor
+ *
+ */
 public class NetworkClient extends Network {
 
+	/**
+	 * Socket objektum.
+	 */
 	private Socket socket = null;
+	
+	/**
+	 * Kimeneti adatfolyam.
+	 */
 	private ObjectOutputStream out = null;
+	
+	/**
+	 * Bemeneti adatfolyam.
+	 */
 	private ObjectInputStream in = null;
 
+
+	
+	/**
+	 * Konstruktor.
+	 * 
+	 * @param j JumbleImage objektum, amellyel össze lesz kapcsolva az osztály adott példánya
+	 */
 	NetworkClient(JumbleImage j) {
 		super(j);
 	}
 
+	/**
+	 * Vételt megvalósító szál, végtelen ciklusban vár a beérkezõ adatokra. 
+	 */
 	private class ReceiverThread implements Runnable {
 
 		public void run() {
@@ -33,6 +65,9 @@ public class NetworkClient extends Network {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	void connect(String ip, int port) {
 		disconnect();
@@ -52,7 +87,10 @@ public class NetworkClient extends Network {
 			JOptionPane.showMessageDialog(null, "Cannot connect to server!","Error",JOptionPane.ERROR_MESSAGE);
 		}
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	void send(String[] s) {
 		if (out == null)
@@ -65,6 +103,9 @@ public class NetworkClient extends Network {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	void disconnect() {
 		try {
